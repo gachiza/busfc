@@ -2,159 +2,156 @@
 
 namespace App\Http\Controllers\facilities;
 
+use App\Application\Facilities\DTOs\FacilityData;
+use App\Application\Facilities\Services\CreateFacilityService;
+use App\Application\Facilities\Services\DeleteFacilityService;
+use App\Application\Facilities\Services\UpdateFacilityService;
+use App\Domain\Facilities\Exceptions\FacilityException;
+use App\Domain\Facilities\Repositories\FacilityRepositoryInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Facilities\FacilityRequest;
 use App\Models\Facility;
-use App\Models\Project;
-use App\Models\Service;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Inertia\Inertia;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+
+
 
 class FacilitiesController extends Controller
 {
-    /**
-     * Display a listing of the facilities with optional filters.
-     * Filters: type (facility_type), partner (partner_organization), capability (LIKE in capabilities).
-     */
-    public function index(Request $request)
-    {
-        $query = Facility::query();
-
-        if ($type = $request->query('type')) {
-            $query->where('facility_type', $type);
-        }
-
-        if ($partner = $request->query('partner')) {
-            $query->where('partner_organization', $partner);
-        }
-
-        if ($capability = $request->query('capability')) {
-            $query->where('capabilities', 'LIKE', "%{$capability}%");
-        }
-
-        // Optional general text search across name, location, description
-        if ($q = $request->query('q')) {
-            $query->where(function ($sub) use ($q) {
-                $sub->where('name', 'LIKE', "%{$q}%")
-                    ->orWhere('location', 'LIKE', "%{$q}%")
-                    ->orWhere('description', 'LIKE', "%{$q}%")
-                    ->orWhere('partner_organization', 'LIKE', "%{$q}%");
-            });
-        }
-
-        $facilities = $query->orderBy('name')->get();
-
-        $types = Facility::FACILITY_TYPES;
-        $partners = Facility::query()
-            ->select('partner_organization')
-            ->whereNotNull('partner_organization')
-            ->distinct()
-            ->orderBy('partner_organization')
-            ->pluck('partner_organization');
-
-        return Inertia::render('facilities/index', [
-            'facilities' => $facilities,
-            'types' => $types,
-            'partners' => $partners
-        ]);
+    public function __construct(
+        private readonly FacilityRepositoryInterface $facilityRepository,
+        private readonly CreateFacilityService $createFacilityService,
+        private readonly UpdateFacilityService $updateFacilityService,
+        private readonly DeleteFacilityService $deleteFacilityService
+    ) {
     }
+
+    /**
+     * Display a listing of facilities.
+     */
+    public function index(): View
+{
+    $facilities = $this->facilityRepository->findAll();
+    
+    // Get unique partner organizations
+    $partners = array_values(array_unique(array_filter(
+        array_map(fn($facility) => $facility->partner_organization ?? null, $facilities)
+    )));
+    sort($partners);
+
+    return view('facilities.index', [
+        'facilities' => $facilities, // Remove array_map
+        'types' => Facility::FACILITY_TYPES,
+        'partners' => $partners,
+    ]);
+}
 
     /**
      * Show the form for creating a new facility.
      */
-    public function create()
-    {
-        $types = Facility::FACILITY_TYPES;
-        return Inertia::render('facilities/create', [
-            'types' => $types
-        ]);
-    }
+    public function create(): View
+{
+    return view('facilities.create', [
+        'types' => Facility::FACILITY_TYPES,
+    ]);
+}
 
     /**
      * Store a newly created facility in storage.
      */
-    public function store(Request $request)
+    public function store(FacilityRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'partner_organization' => 'nullable|string|max:255',
-            'facility_type' => 'required|string|in:' . implode(',', Facility::FACILITY_TYPES),
-            'capabilities' => 'nullable|string', // comma-separated or free text
-        ]);
+        try {
+            $data = FacilityData::fromRequest($request->validated());
+            $facility = $this->createFacilityService->execute($data);
 
-        Facility::create(['facility_id' => (string) Str::uuid()] + $validated);
-
-        return redirect()->route('facilities.index')
-            ->with('success', 'Facility created successfully.');
+            return redirect()
+                ->route('facilities.index')
+                ->with('success', 'Facility created successfully.');
+        } catch (FacilityException $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     /**
      * Display the specified facility.
      */
-    public function show(Facility $facility)
+    public function show(string $facility_id): View
     {
-        $facility->load(['projects', 'services', 'equipment']);
+        $facility = $this->facilityRepository->findById($facility_id);
 
-        return Inertia::render('facilities/show', [
-            'facility' => $facility
+        if (!$facility) {
+            abort(404);
+        }
+        $projectsCount = $this->facilityRepository->countRelatedProjects($facility_id);
+        $servicesCount = $this->facilityRepository->countRelatedServices($facility_id);
+
+        return view('facilities.show', [
+            'facility' => $facility,
+            'projectsCount' => $projectsCount,
+            'servicesCount' => $servicesCount,
         ]);
     }
 
     /**
      * Show the form for editing the specified facility.
      */
-    public function edit(Facility $facility)
+    public function edit(string $facility_id): View
     {
-        $types = Facility::FACILITY_TYPES;
-        return Inertia::render('facilities/edit', [
+        $facility = $this->facilityRepository->findById($facility_id);
+
+        if (!$facility) {
+            abort(404);
+        }
+        $facilityCapabilities = is_array($facility->getFacilityCapabilities()) 
+        ? implode(', ', $facility->getFacilityCapabilities()) 
+        : $facility->getFacilityCapabilities();
+
+        return view('facilities.edit', [
             'facility' => $facility,
-            'types' => $types
+            'types' => Facility::FACILITY_TYPES,
+            'facilityCapabilities' => $facilityCapabilities,
         ]);
     }
 
     /**
      * Update the specified facility in storage.
      */
-    public function update(Request $request, Facility $facility)
+    public function update(FacilityRequest $request, string $facility_id): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'partner_organization' => 'nullable|string|max:255',
-            'facility_type' => 'required|string|in:' . implode(',', Facility::FACILITY_TYPES),
-            'capabilities' => 'nullable|string',
-        ]);
+        try {
+            $data = FacilityData::fromRequest($request->validated());
+            $facility = $this->updateFacilityService->execute($facility_id, $data);
 
-        $facility->update($validated);
-
-        return redirect()->route('facilities.index')
-            ->with('success', 'Facility updated successfully.');
+            return redirect()
+                ->route('facilities.index')
+                ->with('success', 'Facility updated successfully.');
+        } catch (FacilityException $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     /**
-     * Remove the specified facility from storage with safeguards if linked records exist.
+     * Remove the specified facility from storage.
      */
-    public function destroy(Facility $facility)
+    public function destroy(string $facility_id): RedirectResponse
     {
-        $hasProjects = Project::where('facility_id', $facility->facility_id)->exists();
-        $hasServices = Service::where('facility_id', $facility->facility_id)->exists();
+        try {
+            $this->deleteFacilityService->execute($facility_id);
 
-        if ($hasProjects || $hasServices) {
-            $message = 'Cannot delete facility because it is linked to existing ';
-            $links = [];
-            if ($hasProjects) $links[] = 'projects';
-            if ($hasServices) $links[] = 'services';
-            $message .= implode(' and ', $links) . '.';
-
-            return redirect()->route('facilities.index')->with('error', $message);
+            return redirect()
+                ->route('facilities.index')
+                ->with('success', 'Facility deleted successfully.');
+        } catch (FacilityException $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => $e->getMessage()]);
         }
-
-        $facility->delete();
-
-        return redirect()->route('facilities.index')
-            ->with('success', 'Facility deleted successfully.');
     }
 }

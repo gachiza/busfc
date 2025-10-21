@@ -5,20 +5,20 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Participant Profile</h2>
         <div>
-            <a class="btn btn-primary" href="{{ route('participants.edit', $participant->participant_id) }}">Edit</a>
+            <a class="btn btn-primary" href="{{ route('participants.edit', $participant->getParticipantId()) }}">Edit</a>
             <a class="btn btn-secondary" href="{{ route('participants.index') }}">Back to List</a>
         </div>
     </div>
 
     <div class="card mb-3">
         <div class="card-body">
-            <h4 class="card-title">{{ $participant->full_name }}</h4>
-            <p><strong>Email:</strong> {{ $participant->email }}</p>
-            <p><strong>Affiliation:</strong> {{ $participant->affiliation }}</p>
-            <p><strong>Specialization:</strong> {{ $participant->specialization }}</p>
-            <p><strong>Participant Type:</strong> {{ $participant->participant_type }}</p>
-            <p><strong>Institution:</strong> {{ $participant->institution }}</p>
-            <p><strong>Cross-skill Trained:</strong> {{ $participant->cross_skill_trained ? 'Yes' : 'No' }}</p>
+            <h4 class="card-title">{{ $participant->getFullName() }}</h4>
+            <p><strong>Email:</strong> {{ $participant->getEmail() }}</p>
+            <p><strong>Affiliation:</strong> {{ $participant->getAffiliation() }}</p>
+            <p><strong>Specialization:</strong> {{ $participant->getSpecialization() }}</p>
+            <p><strong>Participant Type:</strong> {{ $participant->getParticipantType() }}</p>
+            <p><strong>Institution:</strong> {{ $participant->getInstitution() }}</p>
+            <p><strong>Cross-skill Trained:</strong> {{ $participant->getCrossSkillTrained() ? 'Yes' : 'No' }}</p>
         </div>
     </div>
 
@@ -37,7 +37,7 @@
                 @forelse ($participant->projects as $proj)
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <span>{{ $proj->title }}</span>
-                        <form action="{{ route('participants.projects.remove', [$participant->participant_id, $proj->project_id]) }}" method="POST" class="m-0">
+                        <form action="{{ route('participants.projects.remove', [$participant->getParticipantId(), $proj->project_id]) }}" method="POST" class="m-0">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove from project?')">Remove</button>
@@ -48,7 +48,7 @@
                 @endforelse
             </ul>
 
-            <form action="{{ route('participants.assign', $participant->participant_id) }}" method="POST">
+            <form action="{{ route('participants.assign', $participant->getParticipantId()) }}" method="POST">
                 @csrf
                 <div class="form-row align-items-end">
                     <div class="col-md-6 mb-2">

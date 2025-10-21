@@ -8,7 +8,6 @@ use App\Models\Program;
 use App\Models\Facility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
 
 class ProjectsController extends Controller
 {
@@ -17,10 +16,8 @@ class ProjectsController extends Controller
      */
     public function index()
     {
-        $projects = Project::with(['program', 'facility'])->get();
-        return Inertia::render('projects/index', [
-            'projects' => $projects
-        ]);
+        $projects = Project::with('program')->get();
+        return view('projects.index', compact('projects'));
     }
 
     /**
@@ -30,10 +27,7 @@ class ProjectsController extends Controller
     {
         $programs = Program::all();
         $facilities = Facility::orderBy('name')->get();
-        return Inertia::render('projects/create', [
-            'programs' => $programs,
-            'facilities' => $facilities
-        ]);
+        return view('projects.create', compact('programs', 'facilities'));
     }
 
     /**
@@ -71,10 +65,8 @@ class ProjectsController extends Controller
      */
     public function show(Project $project)
     {
-        $project->load(['program', 'facility', 'participants', 'outcomes']);
-        return Inertia::render('projects/show', [
-            'project' => $project
-        ]);
+        $project->load('program');
+        return view('projects.show', compact('project'));
     }
 
     /**
@@ -84,11 +76,7 @@ class ProjectsController extends Controller
     {
         $programs = Program::all();
         $facilities = Facility::orderBy('name')->get();
-        return Inertia::render('projects/edit', [
-            'project' => $project,
-            'programs' => $programs,
-            'facilities' => $facilities
-        ]);
+        return view('projects.edit', compact('project', 'programs', 'facilities'));
     }
 
     /**

@@ -29,7 +29,15 @@ return new class extends Migration
                 ->on('programs')
                 ->onDelete('cascade');
 
-                    });
+            
+            $table->foreign('facility_id')
+                ->references('facility_id')
+                ->on('facilities')
+                ->onDelete('set null');
+    
+            });
+            
+ 
     }
 
     /**

@@ -67,7 +67,7 @@ class Project extends Model
      */
     public function facility()
     {
-        return $this->belongsTo(Facility::class, 'facility_id', 'facility_id');
+         return $this->belongsTo(Facility::class, 'facility_id', 'facility_id');
     }
 
     /**
@@ -75,7 +75,7 @@ class Project extends Model
      */
     public function participants()
     {
-        return $this->belongsToMany(Participant::class, 'participant_project', 'project_id', 'participant_id');
+        return $this->hasMany(Participant::class, 'project_id', 'project_id');
     }
 
     /**

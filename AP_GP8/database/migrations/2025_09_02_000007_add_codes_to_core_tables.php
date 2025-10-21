@@ -19,9 +19,7 @@ return new class extends Migration
             $table->string('project_code')->nullable()->unique()->after('project_id');
         });
 
-        Schema::table('facilities', function (Blueprint $table) {
-            $table->string('facility_code')->nullable()->unique()->after('facility_id');
-        });
+       
     }
 
     /**

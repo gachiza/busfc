@@ -17,9 +17,17 @@
     <form action="{{ route('equipment.update', $equipment->equipment_id) }}" method="POST">
         @csrf
         @method('PUT')
-        <div class="form-group mb-2">
-            <label>Facility ID</label>
-            <input type="text" name="facility_id" class="form-control" value="{{ old('facility_id', $equipment->facility_id) }}" required>
+       <div class="form-group mb-2">
+            <label>Facility</label>
+                <select name="facility_id" class="form-control" required>
+                    <option value="">Select a facility</option>
+                    @foreach ($facilities as $facility)
+                        <option value="{{ $facility->facility_id }}" 
+                            {{ old('facility_id', $equipment->facility_id) == $facility->facility_id ? 'selected' : '' }}>
+                            {{ $facility->name }}
+                        </option>
+                    @endforeach
+                </select>
         </div>
         <div class="form-group mb-2">
             <label>Name</label>

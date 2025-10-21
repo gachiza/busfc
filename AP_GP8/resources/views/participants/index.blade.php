@@ -26,17 +26,17 @@
         <tbody>
         @forelse ($participants as $p)
             <tr>
-                <td>{{ $p->full_name }}</td>
-                <td>{{ $p->email }}</td>
-                <td>{{ $p->affiliation }}</td>
-                <td>{{ $p->specialization }}</td>
-                <td>{{ $p->institution }}</td>
-                <td>{{ $p->cross_skill_trained ? 'Yes' : 'No' }}</td>
+                <td>{{ $p->getFullName() }}</td>
+                <td>{{ $p->getEmail() }}</td>
+                <td>{{ $p->getAffiliation() }}</td>
+                <td>{{ $p->getSpecialization() }}</td>
+                <td>{{ $p->getInstitution() }}</td>
+                <td>{{ $p->getCrossSkillTrained() ? 'Yes' : 'No' }}</td>
                 <td>
                     <div class="d-flex align-items-center">
-                        <a class="btn btn-info btn-sm mr-2 px-3 py-1" href="{{ route('participants.show', $p->participant_id) }}">View</a>
-                        <a class="btn btn-primary btn-sm mr-2 px-3 py-1" href="{{ route('participants.edit', $p->participant_id) }}">Edit</a>
-                        <form action="{{ route('participants.destroy', $p->participant_id) }}" method="POST" class="m-0">
+                        <a class="btn btn-info btn-sm mr-2 px-3 py-1" href="{{ route('participants.show', $p->getParticipantId()) }}">View</a>
+                        <a class="btn btn-primary btn-sm mr-2 px-3 py-1" href="{{ route('participants.edit', $p->getParticipantId()) }}">Edit</a>
+                        <form action="{{ route('participants.destroy', $p->getParticipantId()) }}" method="POST" class="m-0">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm px-3 py-1" onclick="return confirm('Delete this participant?')">Delete</button>

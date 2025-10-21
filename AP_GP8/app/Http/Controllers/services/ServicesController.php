@@ -4,10 +4,8 @@ namespace App\Http\Controllers\services;
 
 use App\Http\Controllers\Controller;
 use App\Models\Service;
-use App\Models\Facility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
 
 class ServicesController extends Controller
 {
@@ -17,10 +15,10 @@ class ServicesController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Service::with('facility');
+        $query = Service::query();
 
-        if ($facilityId = $request->query('facility_id')) {
-            $query->where('facility_id', $facilityId);
+        if ($facility_id = $request->query('facility_id')) {
+            $query->where('facility_id', $facility_id);
         }
 
         if ($category = $request->query('category')) {
@@ -29,9 +27,7 @@ class ServicesController extends Controller
 
         $services = $query->orderBy('name')->get();
 
-        return Inertia::render('services/index', [
-            'services' => $services
-        ]);
+        return view('services.index', compact('services'));
     }
 
     /**
@@ -39,17 +35,10 @@ class ServicesController extends Controller
      */
     public function create(Request $request)
     {
-        $prefillFacilityId = $request->query('facility_id');
+        $prefillfacility_id = $request->query('facility_id');
         $categories = Service::CATEGORIES;
         $skillTypes = Service::SKILL_TYPES;
-        $facilities = Facility::orderBy('name')->get();
-        
-        return Inertia::render('services/create', [
-            'prefillFacilityId' => $prefillFacilityId,
-            'categories' => $categories,
-            'skillTypes' => $skillTypes,
-            'facilities' => $facilities
-        ]);
+        return view('services.create', compact('prefillfacility_id', 'categories', 'skillTypes'));
     }
 
     /**
@@ -71,32 +60,13 @@ class ServicesController extends Controller
     }
 
     /**
-     * Display the specified service.
-     */
-    public function show(Service $service)
-    {
-        $service->load('facility');
-
-        return Inertia::render('services/show', [
-            'service' => $service
-        ]);
-    }
-
-    /**
      * Show the form for editing the specified service.
      */
     public function edit(Service $service)
     {
         $categories = Service::CATEGORIES;
         $skillTypes = Service::SKILL_TYPES;
-        $facilities = Facility::orderBy('name')->get();
-        
-        return Inertia::render('services/edit', [
-            'service' => $service,
-            'categories' => $categories,
-            'skillTypes' => $skillTypes,
-            'facilities' => $facilities
-        ]);
+        return view('services.edit', compact('service', 'categories', 'skillTypes'));
     }
 
     /**

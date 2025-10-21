@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, FolderOpen, Building2, Wrench, Users, Target, Cog } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -13,41 +13,6 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
-    },
-    {
-        title: 'Programs',
-        href: '/programs',
-        icon: FolderOpen,
-    },
-    {
-        title: 'Projects',
-        href: '/projects',
-        icon: Folder,
-    },
-    {
-        title: 'Facilities',
-        href: '/facilities',
-        icon: Building2,
-    },
-    {
-        title: 'Equipment',
-        href: '/equipment',
-        icon: Wrench,
-    },
-    {
-        title: 'Services',
-        href: '/services',
-        icon: Cog,
-    },
-    {
-        title: 'Participants',
-        href: '/participants',
-        icon: Users,
-    },
-    {
-        title: 'Outcomes',
-        href: '/outcomes',
-        icon: Target,
     },
 ];
 

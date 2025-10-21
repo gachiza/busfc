@@ -4,34 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Facility extends Model
 {
     use HasFactory;
+    
+    protected $primaryKey = 'facility_id';      // Add this
+    public $incrementing = false;               // Add this
+    protected $keyType = 'string';              // Add this
 
-    /**
-     * The table associated with the model.
-     */
-    protected $table = 'facilities';
-
-    /**
-     * The primary key associated with the table.
-     */
-    protected $primaryKey = 'facility_id';
-
-    /**
-     * Indicates if the IDs are auto-incrementing.
-     */
-    public $incrementing = false;
-
-    /**
-     * The data type of the primary key.
-     */
-    protected $keyType = 'string';
-
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'facility_id',
         'facility_code',
@@ -43,40 +26,47 @@ class Facility extends Model
         'capabilities',
     ];
 
-    /**
-     * Use facility_id for route model binding.
-     */
-    public function getRouteKeyName()
-    {
-        return 'facility_id';
-    }
+    protected $casts = [
+        'capabilities' => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
-    /**
-     * Allowed values for facility_type.
-     */
     public const FACILITY_TYPES = ['Lab', 'Workshop', 'Testing Center'];
 
     /**
-     * Relationships
+     * Get the services for this facility
      */
-    public function projects()
-    {
-        return $this->hasMany(Project::class, 'facility_id', 'facility_id');
-    }
-
-    public function services()
+    public function services(): HasMany
     {
         return $this->hasMany(Service::class, 'facility_id', 'facility_id');
     }
 
-    public function equipment()
+    /**
+     * Get the equipment for this facility
+     */
+    public function equipment(): HasMany
     {
         return $this->hasMany(Equipment::class, 'facility_id', 'facility_id');
+    }
+
+    /**
+     * Get the projects for this facility
+     */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class, 'facility_id', 'facility_id');
     }
 
     protected static function booted()
     {
         static::creating(function (Facility $facility) {
+            // Generate facility_id if not set
+            if (empty($facility->facility_id)) {
+                $facility->facility_id = (string) Str::uuid();
+            }
+            
+            // Generate facility_code if not set
             if (empty($facility->facility_code) && !empty($facility->name)) {
                 $base = strtoupper(preg_replace('/[^A-Z0-9]+/i', '-', $facility->name));
                 $base = trim($base, '-');

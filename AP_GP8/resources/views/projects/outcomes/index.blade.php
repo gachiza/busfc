@@ -4,7 +4,9 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Outcomes for: {{ $project->title }}</h2>
-        <a class="btn btn-success" href="{{ route('projects.outcomes.create', $project->project_id) }}">Upload New Outcome</a>
+        <a class="btn btn-success" href="{{ route('projects.outcomes.create', ['project' => $project->project_id]) }}">
+    Upload New Outcome
+</a>
     </div>
 
     @if (session('success'))

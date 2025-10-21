@@ -21,7 +21,7 @@
         @csrf
         <div class="mb-3">
             <label class="form-label"><strong>Facility ID</strong></label>
-            <input type="text" name="facility_id" value="{{ old('facility_id', $prefillFacilityId) }}" class="form-control" required>
+            <input type="text" name="facility_id" value="{{ old('facility_id', $prefillfacility_id) }}" class="form-control" required>
         </div>
         <div class="mb-3">
             <label class="form-label"><strong>Name</strong></label>

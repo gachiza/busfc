@@ -41,6 +41,8 @@
                         <form action="{{ route('projects.destroy', $project->project_id) }}" method="POST">
                             <a class="btn btn-info" href="{{ route('projects.show', $project->project_id) }}">Show</a>
                             <a class="btn btn-primary" href="{{ route('projects.edit', $project->project_id) }}">Edit</a>
+
+                            <a class="btn btn-secondary" href="{{ url('projects/' . $project->project_id . '/outcomes') }}">Outcomes</a>
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger">Delete</button>

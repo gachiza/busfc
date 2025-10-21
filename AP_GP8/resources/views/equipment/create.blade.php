@@ -17,8 +17,15 @@
     <form action="{{ route('equipment.store') }}" method="POST">
         @csrf
         <div class="form-group mb-2">
-            <label>Facility ID</label>
-            <input type="text" name="facility_id" class="form-control" value="{{ old('facility_id', $prefillFacilityId ?? '') }}" required>
+            <label>Facility</label>
+                <select name="facility_id" class="form-control" required>
+                    <option value="">Select a facility</option>
+                        @foreach ($facilities as $facility)
+                            <option value="{{ $facility->facility_id }}" {{ old('facility_id', $prefillfacility_id ?? '') == $facility->id ? 'selected' : '' }}>
+                                {{ $facility->name }}
+                            </option>
+                        @endforeach
+            </select>
         </div>
         <div class="form-group mb-2">
             <label>Name</label>

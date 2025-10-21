@@ -8,7 +8,6 @@ use App\Models\Facility;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
 
 class EquipmentController extends Controller
 {
@@ -18,10 +17,10 @@ class EquipmentController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Equipment::with('facility');
+        $query = Equipment::query();
 
-        if ($facilityId = $request->query('facility_id')) {
-            $query->where('facility_id', $facilityId);
+        if ($facility_id = $request->query('facility_id')) {
+            $query->where('facility_id', $facility_id);
         }
 
         if ($usage = $request->query('usage_domain')) {
@@ -42,9 +41,26 @@ class EquipmentController extends Controller
 
         $equipment = $query->orderBy('name')->get();
 
-        return Inertia::render('equipment/index', [
-            'equipment' => $equipment
-        ]);
+        $usageDomains = Equipment::USAGE_DOMAINS;
+        $supportPhases = Equipment::SUPPORT_PHASES;
+
+        return view('equipment.index', compact('equipment', 'usageDomains', 'supportPhases'));
+    }
+
+    /**
+     * List all equipment at a specific facility.
+     */
+    public function byFacility(Facility $facility)
+    {
+        $equipment = Equipment::where('facility_id', $facility->facility_id)
+            ->orderBy('name')
+            ->get();
+
+        $usageDomains = Equipment::USAGE_DOMAINS;
+        $supportPhases = Equipment::SUPPORT_PHASES;
+        $selectedfacility_id = $facility->facility_id;
+
+        return view('equipment.index', compact('equipment', 'usageDomains', 'supportPhases', 'selectedfacility_id', 'facility'));
     }
 
     /**
@@ -52,17 +68,17 @@ class EquipmentController extends Controller
      */
     public function create(Request $request)
     {
-        $prefillFacilityId = $request->query('facility_id');
+        $prefillfacility_id = $request->query('facility_id');
         $usageDomains = Equipment::USAGE_DOMAINS;
         $supportPhases = Equipment::SUPPORT_PHASES;
         $facilities = Facility::orderBy('name')->get();
-        
-        return Inertia::render('equipment/create', [
-            'prefillFacilityId' => $prefillFacilityId,
-            'usageDomains' => $usageDomains,
-            'supportPhases' => $supportPhases,
-            'facilities' => $facilities
-        ]);
+
+        return view('equipment.create', compact(
+            'prefillfacility_id',
+            'usageDomains',
+            'supportPhases',
+            'facilities'
+        ));
     }
 
     /**
@@ -90,11 +106,8 @@ class EquipmentController extends Controller
      */
     public function show(Equipment $equipment)
     {
-        $equipment->load('facility');
-
-        return Inertia::render('equipment/show', [
-            'equipment' => $equipment
-        ]);
+        $facility = Facility::where('facility_id', $equipment->facility_id)->first();
+        return view('equipment.show', compact('equipment', 'facility'));
     }
 
     /**
@@ -104,14 +117,8 @@ class EquipmentController extends Controller
     {
         $usageDomains = Equipment::USAGE_DOMAINS;
         $supportPhases = Equipment::SUPPORT_PHASES;
-        $facilities = Facility::orderBy('name')->get();
-        
-        return Inertia::render('equipment/edit', [
-            'equipment' => $equipment,
-            'usageDomains' => $usageDomains,
-            'supportPhases' => $supportPhases,
-            'facilities' => $facilities
-        ]);
+        $facilities = Facility::orderBy('name')->get(); // <-- Add this
+        return view('equipment.edit', compact('equipment', 'usageDomains', 'supportPhases', 'facilities'));
     }
 
     /**

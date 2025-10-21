@@ -10,7 +10,7 @@
     <form method="GET" action="{{ route('equipment.index') }}" class="mb-3">
         <div class="row g-2">
             <div class="col-md-3">
-                <input type="text" name="facility_id" value="{{ request('facility_id', $selectedFacilityId ?? '') }}" class="form-control" placeholder="Filter by Facility ID">
+                <input type="text" name="facility_id" value="{{ request('facility_id', $selectedfacility_id ?? '') }}" class="form-control" placeholder="Filter by Facility ID">
             </div>
             <div class="col-md-3">
                 <select name="usage_domain" class="form-control">

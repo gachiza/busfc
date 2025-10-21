@@ -8,7 +8,6 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
 
 class OutcomesController extends Controller
 {
@@ -18,9 +17,7 @@ class OutcomesController extends Controller
     public function index(Project $project)
     {
         $project->load('outcomes');
-        return Inertia::render('projects.outcomes/index', [
-            'project' => $project
-        ]);
+        return view('projects.outcomes.index', compact('project'));
     }
 
     /**
@@ -30,11 +27,7 @@ class OutcomesController extends Controller
     {
         $types = Outcome::OUTCOME_TYPES;
         $statuses = Outcome::COMMERCIALIZATION_STATUSES;
-        return Inertia::render('projects.outcomes/create', [
-            'project' => $project,
-            'types' => $types,
-            'statuses' => $statuses
-        ]);
+        return view('projects.outcomes.create', compact('project', 'types', 'statuses'));
     }
 
     /**
@@ -82,12 +75,7 @@ class OutcomesController extends Controller
 
         $types = Outcome::OUTCOME_TYPES;
         $statuses = Outcome::COMMERCIALIZATION_STATUSES;
-        return Inertia::render('projects.outcomes/edit', [
-            'project' => $project,
-            'outcome' => $outcome,
-            'types' => $types,
-            'statuses' => $statuses
-        ]);
+        return view('projects.outcomes.edit', compact('project', 'outcome', 'types', 'statuses'));
     }
 
     /**

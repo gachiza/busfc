@@ -23,7 +23,7 @@
         </div>
     @endif
   
-    <form action="{{ route('programs.update',$program->program_id) }}" method="POST">
+    <form action="{{ route('programs.update',$program->getProgramId()) }}" method="POST">
         @csrf
         @method('PUT')
    
@@ -31,31 +31,31 @@
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Name:</strong>
-                    <input type="text" name="name" value="{{ $program->name }}" class="form-control" placeholder="Name">
+                    <input type="text" name="name" value="{{ $program->getName() }}" class="form-control" placeholder="Name">
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Description:</strong>
-                    <textarea class="form-control" style="height:150px" name="description" placeholder="Description">{{ $program->description }}</textarea>
+                    <textarea class="form-control" style="height:150px" name="description" placeholder="Description">{{ $program->getDescription() }}</textarea>
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>National Alignment:</strong>
-                    <input type="text" name="national_alignment" value="{{ $program->national_alignment }}" class="form-control" placeholder="National Alignment">
+                    <input type="text" name="national_alignment" value="{{$program->getNationalAlignment() }}" class="form-control" placeholder="National Alignment">
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Focus Areas:</strong>
-                    <input type="text" name="focus_areas" value="{{ $program->focus_areas }}" class="form-control" placeholder="Focus Areas">
+                    <input type="text" name="focus_areas" value="{{ $program->getFocusAreas() }}" class="form-control" placeholder="Focus Areas">
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Phases:</strong>
-                    <input type="text" name="phases" value="{{ $program->phases }}" class="form-control" placeholder="Phases">
+                    <input type="text" name="phases" value="{{$program->getPhases() }}" class="form-control" placeholder="Phases">
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-12 text-center">

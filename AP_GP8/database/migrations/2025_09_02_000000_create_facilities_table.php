@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('facilities', function (Blueprint $table) {
             $table->string('facility_id')->primary();
+            $table->string('facility_code')->unique();
             $table->string('name');
             $table->string('location');
             $table->text('description')->nullable();

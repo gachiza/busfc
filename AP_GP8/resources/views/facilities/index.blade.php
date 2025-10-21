@@ -59,16 +59,16 @@
         <tbody>
         @forelse ($facilities as $facility)
             <tr>
-                <td>{{ $facility->facility_id }}</td>
-                <td>{{ $facility->name }}</td>
-                <td>{{ $facility->facility_type }}</td>
-                <td>{{ $facility->partner_organization }}</td>
-                <td>{{ $facility->location }}</td>
-                <td>{{ Str::limit($facility->capabilities, 60) }}</td>
+                <td>{{ $facility->getFacilityId() }}</td>
+                <td>{{ $facility->getFacilityName() }}</td>
+                <td>{{ $facility->getFacilityType() }}</td>
+                <td>{{ $facility->getPartnerOrganization() }}</td>
+                <td>{{ $facility->getFacilityLocation() }}</td>
+                <td>{{ Str::limit(implode(', ', $facility->getFacilityCapabilities()), 60) }}</td>
                 <td>
-                    <a class="btn btn-info btn-sm" href="{{ route('facilities.show', $facility->facility_id) }}">View</a>
-                    <a class="btn btn-primary btn-sm" href="{{ route('facilities.edit', $facility->facility_id) }}">Edit</a>
-                    <form action="{{ route('facilities.destroy', $facility->facility_id) }}" method="POST" style="display:inline-block">
+                    <a class="btn btn-info btn-sm" href="{{ route('facilities.show', $facility->getFacilityId() ) }}">View</a>
+                    <a class="btn btn-primary btn-sm" href="{{ route('facilities.edit', $facility->getFacilityId() ) }}">Edit</a>
+                    <form action="{{ route('facilities.destroy', $facility->getFacilityId() ) }}" method="POST" style="display:inline-block">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this facility?')">Delete</button>

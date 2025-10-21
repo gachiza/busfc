@@ -5,19 +5,19 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Facility Details</h2>
         <div>
-            <a class="btn btn-primary" href="{{ route('facilities.edit', $facility->facility_id) }}">Edit</a>
+            <a class="btn btn-primary" href="{{ route('facilities.edit', $facility->getFacilityId() ) }}">Edit</a>
             <a class="btn btn-secondary" href="{{ route('facilities.index') }}">Back to List</a>
         </div>
-    </div>
+</div>
 
     <div class="card mb-3">
         <div class="card-body">
-            <h4 class="card-title">{{ $facility->name }}</h4>
-            <p><strong>Type:</strong> {{ $facility->facility_type }}</p>
-            <p><strong>Partner Organization:</strong> {{ $facility->partner_organization }}</p>
-            <p><strong>Location:</strong> {{ $facility->location }}</p>
-            <p><strong>Description:</strong> {{ $facility->description }}</p>
-            <p><strong>Capabilities:</strong> {{ $facility->capabilities }}</p>
+            <h4 class="card-title">{{ $facility->getFacilityName() }}</h4>
+            <p><strong>Type:</strong> {{ $facility->getFacilityType() }}</p>
+            <p><strong>Partner Organization:</strong> {{ $facility->getPartnerOrganization() }}</p>
+            <p><strong>Location:</strong> {{ $facility->getFacilityLocation() }}</p>
+            <p><strong>Description:</strong> {{ $facility->getFacilityDescription()}}</p>
+            <p><strong>Capabilities:</strong> {{ is_array($facility->getFacilityCapabilities()) ? implode(', ', $facility->getFacilityCapabilities()) : $facility->getFacilityCapabilities() }}</p>
         </div>
     </div>
 
