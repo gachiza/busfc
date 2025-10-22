@@ -21,8 +21,12 @@ class DeleteProgramService
             throw ProgramExceptions::notFound($id);
         }
 
-        // The repository will handle the business rule check
-        // (preventing deletion if projects exist)
+        // Check for associated projects before deletion
+        $projects = $this->repo->getProjects($id);
+        if (!empty($projects)) {
+            throw ProgramExceptions::cannotDeleteWithProjects();
+        }
+
         $this->repo->delete($id);
     }
 }

@@ -8,11 +8,15 @@ use App\Domain\Projects\Repositories\ProjectRepositoryInterface;
 class FakeProjectRepository implements ProjectRepositoryInterface
 {
     private array $store = [];
+    private array $capabilities = [];
 
     public function __construct(array $seed = [])
     {
         foreach ($seed as $s) {
             $this->store[$s['project_id'] ?? uniqid('prj_')] = $s;
+            if (!empty($s['capabilities']) && !empty($s['facility_id'])) {
+                $this->capabilities[$s['facility_id']] = $s['capabilities'];
+            }
         }
     }
 
@@ -41,8 +45,25 @@ class FakeProjectRepository implements ProjectRepositoryInterface
 
     public function facilityHasCapability(string $facilityId, string $requirement): bool
     {
-        // For tests, this will be stubbed by seeding facilities elsewhere; default to true for simplicity
+        // Check seeded capabilities map first
+        if (isset($this->capabilities[$facilityId])) {
+            $caps = $this->capabilities[$facilityId];
+            if (is_array($caps)) {
+                return in_array($requirement, $caps);
+            }
+            // if string, check comma-separated
+            $parts = array_map('trim', explode(',', (string)$caps));
+            return in_array($requirement, $parts);
+        }
+
+        // default to true (backwards compatible)
         return true;
+    }
+
+    // Test helper to set capabilities for a facility
+    public function setFacilityCapabilities(string $facilityId, array|string $capabilities): void
+    {
+        $this->capabilities[$facilityId] = $capabilities;
     }
 
     public function facilityHasActiveProjectUsingEquipment(string $facilityId, string $equipmentId): bool

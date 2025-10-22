@@ -12,13 +12,30 @@ class ProjectEntity
         private ?array $outcomes = null,
         private ?string $status = 'draft',
         private ?string $project_id = null,
-        private ?string $testing_requirements = null,
+        private ?array $testing_requirements = null,
         private ?string $description = null
     ) {}
 
+    private function validateTitle(string $title): void
+    {
+        if (empty(trim($title))) {
+            throw \App\Domain\Projects\Exceptions\ProjectExceptions::missingRequiredFields();
+        }
+        if (strlen($title) > 255) {
+            throw new \Exception('Project title too long');
+        }
+    }
+
+    private function validateRequiredAssociations(string $programId, string $facilityId): void
+    {
+        if (empty(trim($programId)) || empty(trim($facilityId))) {
+            throw \App\Domain\Projects\Exceptions\ProjectExceptions::missingRequiredFields();
+        }
+    }
+
     public static function fromArray(array $data): self
     {
-        return new self(
+        $entity = new self(
             $data['title'],
             $data['program_id'],
             $data['facility_id'],
@@ -29,6 +46,12 @@ class ProjectEntity
             $data['testing_requirements'] ?? null,
             $data['description'] ?? null
         );
+
+        // run validations
+        $entity->validateTitle($data['title']);
+        $entity->validateRequiredAssociations($data['program_id'], $data['facility_id']);
+
+        return $entity;
     }
 
     public function toArray(): array
@@ -53,5 +76,5 @@ class ProjectEntity
     public function getOutcomes(): ?array { return $this->outcomes; }
     public function getStatus(): ?string { return $this->status; }
     public function getProjectId(): ?string { return $this->project_id; }
-    public function getTestingRequirements(): ?string { return $this->testing_requirements; }
+    public function getTestingRequirements(): ?array { return $this->testing_requirements; }
 }

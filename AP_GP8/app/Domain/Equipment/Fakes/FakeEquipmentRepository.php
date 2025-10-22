@@ -18,12 +18,32 @@ class FakeEquipmentRepository implements EquipmentRepositoryInterface
 
     public function findById(string $equipment_id): ?EquipmentEntity
     {
-        return isset($this->store[$equipment_id]) ? new EquipmentEntity(...array_values($this->store[$equipment_id])) : null;
+        if (!isset($this->store[$equipment_id])) return null;
+        $s = $this->store[$equipment_id];
+        return new EquipmentEntity(
+            $s['name'] ?? '',
+            $s['facility_id'] ?? '',
+            $s['inventory_code'] ?? '',
+            $s['usage_domain'] ?? '',
+            $s['support_phase'] ?? [],
+            $s['capabilities'] ?? null,
+            $s['description'] ?? null,
+            $s['equipment_id'] ?? null
+        );
     }
 
     public function findAll(): array
     {
-        return array_map(fn($s) => new EquipmentEntity(...array_values($s)), array_values($this->store));
+        return array_map(fn($s) => new EquipmentEntity(
+            $s['name'] ?? '',
+            $s['facility_id'] ?? '',
+            $s['inventory_code'] ?? '',
+            $s['usage_domain'] ?? '',
+            $s['support_phase'] ?? [],
+            $s['capabilities'] ?? null,
+            $s['description'] ?? null,
+            $s['equipment_id'] ?? null
+        ), array_values($this->store));
     }
 
     public function existsByInventoryCode(string $inventory_code, ?string $exclude_equipment_id = null): bool
@@ -49,7 +69,17 @@ class FakeEquipmentRepository implements EquipmentRepositoryInterface
             'description' => $equipment->getDescription(),
         ];
         $this->store[$id] = $arr;
-        return $equipment;
+        // Return an entity with the assigned id
+        return new EquipmentEntity(
+            $arr['name'],
+            $arr['facility_id'],
+            $arr['inventory_code'],
+            $arr['usage_domain'],
+            $arr['support_phase'],
+            $arr['capabilities'],
+            $arr['description'],
+            $arr['equipment_id']
+        );
     }
 
     public function update(EquipmentEntity $equipment): EquipmentEntity
@@ -66,7 +96,17 @@ class FakeEquipmentRepository implements EquipmentRepositoryInterface
             'capabilities' => $equipment->getCapabilities(),
             'description' => $equipment->getDescription(),
         ];
-        return $equipment;
+        $arr = $this->store[$id];
+        return new EquipmentEntity(
+            $arr['name'],
+            $arr['facility_id'],
+            $arr['inventory_code'],
+            $arr['usage_domain'],
+            $arr['support_phase'],
+            $arr['capabilities'],
+            $arr['description'],
+            $arr['equipment_id']
+        );
     }
 
     public function delete(string $equipment_id): bool
@@ -75,8 +115,19 @@ class FakeEquipmentRepository implements EquipmentRepositoryInterface
         return false;
     }
 
+    private array $projects = [];
+
     public function hasActiveProjects(string $equipment_id): bool
     {
-        return false;
+        return !empty($this->projects[$equipment_id] ?? []);
+    }
+
+    // Test helper to simulate assignment to active projects
+    public function attachProject(string $equipment_id, string $projectId): void
+    {
+        if (!isset($this->projects[$equipment_id])) {
+            $this->projects[$equipment_id] = [];
+        }
+        $this->projects[$equipment_id][] = $projectId;
     }
 }

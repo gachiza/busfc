@@ -45,4 +45,9 @@ class ProgramExceptions extends Exception
     {
         return new self("Cannot delete program with existing projects. Archive or reassign projects first.");
     }
+
+    public static function invalidNationalAlignment(array $validAlignments): self
+    {
+        return new self("National alignment must be one of: " . implode(', ', $validAlignments));
+    }
 }

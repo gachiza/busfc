@@ -22,10 +22,53 @@ class FakeProgramRepository implements ProgramRepositoryInterface
     }
 
     public function all(): array { return array_map(fn($s) => ProgramEntity::fromArray($s), array_values($this->store)); }
-    public function create(ProgramEntity $program): ProgramEntity { throw new \Exception('Not implemented'); }
-    public function update(ProgramEntity $program): ProgramEntity { throw new \Exception('Not implemented'); }
-    public function delete(string $id): void { unset($this->store[$id]); }
-    public function findById(string $id): ?ProgramEntity { return isset($this->store[$id]) ? ProgramEntity::fromArray($this->store[$id]) : null; }
-    public function existsByName(string $name): bool { foreach ($this->store as $s) { if (strtolower($s['name']) === strtolower($name)) return true; } return false; }
-    public function getProjects(string $programId): array { return []; }
+    private array $projects = [];
+
+    public function create(ProgramEntity $program): ProgramEntity {
+        $id = uniqid('prg_');
+        $data = $program->toArray();
+        $data['program_id'] = $id;
+        $this->store[$id] = $data;
+        return ProgramEntity::fromArray($data);
+    }
+
+    public function update(ProgramEntity $program): ProgramEntity {
+        $id = $program->getId();
+        if (!isset($this->store[$id])) {
+            throw new \Exception("Program not found: $id");
+        }
+        $data = $program->toArray();
+        $this->store[$id] = $data;
+        return $program;
+    }
+
+    public function delete(string $id): void {
+        if (!empty($this->projects[$id] ?? [])) {
+            throw ProgramExceptions::hasProjects($id);
+        }
+        unset($this->store[$id]);
+    }
+
+    public function findById(string $id): ?ProgramEntity {
+        return isset($this->store[$id]) ? ProgramEntity::fromArray($this->store[$id]) : null;
+    }
+
+    public function existsByName(string $name): bool {
+        foreach ($this->store as $s) {
+            if (strtolower($s['name']) === strtolower($name)) return true;
+        }
+        return false;
+    }
+
+    public function getProjects(string $programId): array {
+        return $this->projects[$programId] ?? [];
+    }
+
+    // Test helper to simulate project attachment
+    public function attachProject(string $programId, string $projectId): void {
+        if (!isset($this->projects[$programId])) {
+            $this->projects[$programId] = [];
+        }
+        $this->projects[$programId][] = $projectId;
+    }
 }

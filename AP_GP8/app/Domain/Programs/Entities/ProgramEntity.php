@@ -25,6 +25,7 @@ class ProgramEntity
         // Validate business rules
         $this->validateName($name);
         $this->validateDescription($description);
+        $this->validateNationalAlignment($focus_areas, $national_alignment);
         
         $this->program_id = $program_id ?? $this->generateId();
         $this->name = $name;
@@ -144,6 +145,29 @@ class ProgramEntity
     {
         if (empty(trim($description))) {
             throw ProgramExceptions::emptyDescription();
+        }
+    }
+
+    private function validateNationalAlignment(?string $focus_areas, ?string $national_alignment): void
+    {
+        $validAlignments = ['NDPIII', 'DigitalRoadmap2023_2028', '4IR'];
+        
+        if (!empty($focus_areas) && empty($national_alignment)) {
+            throw ProgramExceptions::missingNationalAlignment();
+        }
+
+        if (!empty($national_alignment)) {
+            $alignments = array_map('trim', explode(',', $national_alignment));
+            $valid = false;
+            foreach ($alignments as $alignment) {
+                if (in_array($alignment, $validAlignments)) {
+                    $valid = true;
+                    break;
+                }
+            }
+            if (!$valid) {
+                throw ProgramExceptions::invalidNationalAlignment($validAlignments);
+            }
         }
     }
 
