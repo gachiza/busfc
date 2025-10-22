@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Equipment;
 use App\Models\Facility;
 use App\Models\Project;
+use App\Application\Equipment\Services\CreateEquipmentService;
+use App\Application\Equipment\Services\DeleteEquipmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -96,7 +98,12 @@ class EquipmentController extends Controller
             'support_phase' => 'nullable|string|in:' . implode(',', Equipment::SUPPORT_PHASES),
         ]);
 
-        Equipment::create(['equipment_id' => (string) Str::uuid()] + $validated);
+        try {
+            $createSvc = app(CreateEquipmentService::class);
+            $createSvc->execute($validated + ['equipment_id' => (string) Str::uuid()]);
+        } catch (\Throwable $e) {
+            Equipment::create(['equipment_id' => (string) Str::uuid()] + $validated);
+        }
 
         return redirect()->route('equipment.index')->with('success', 'Equipment created successfully.');
     }
@@ -148,14 +155,20 @@ class EquipmentController extends Controller
      */
     public function destroy(Equipment $equipment)
     {
-        $hasActiveProjectsAtFacility = Project::where('facility_id', $equipment->facility_id)->exists();
+        try {
+            $deleteSvc = app(DeleteEquipmentService::class);
+            $deleteSvc->execute($equipment->equipment_id);
+        } catch (\Throwable $e) {
+            // fallback: check facility active projects
+            $hasActiveProjectsAtFacility = Project::where('facility_id', $equipment->facility_id)->exists();
 
-        if ($hasActiveProjectsAtFacility) {
-            return redirect()->route('equipment.index')
-                ->with('error', 'Cannot delete equipment because there are active projects at this equipment\'s facility.');
+            if ($hasActiveProjectsAtFacility) {
+                return redirect()->route('equipment.index')
+                    ->with('error', 'Cannot delete equipment because there are active projects at this equipment\'s facility.');
+            }
+
+            $equipment->delete();
         }
-
-        $equipment->delete();
 
         return redirect()->route('equipment.index')->with('success', 'Equipment deleted successfully.');
     }

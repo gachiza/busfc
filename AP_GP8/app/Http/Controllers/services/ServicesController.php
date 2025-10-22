@@ -4,6 +4,8 @@ namespace App\Http\Controllers\services;
 
 use App\Http\Controllers\Controller;
 use App\Models\Service;
+use App\Application\Services\Services\CreateServiceService;
+use App\Application\Services\Services\DeleteServiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -25,9 +27,12 @@ class ServicesController extends Controller
             $query->where('category', $category);
         }
 
-        $services = $query->orderBy('name')->get();
+    $services = $query->orderBy('name')->get();
 
-        return view('services.index', compact('services'));
+    // Pass facilities for filter dropdown
+    $facilities = \App\Models\Facility::orderBy('name')->get();
+
+        return view('services.index', compact('services', 'facilities'));
     }
 
     /**
@@ -38,7 +43,8 @@ class ServicesController extends Controller
         $prefillfacility_id = $request->query('facility_id');
         $categories = Service::CATEGORIES;
         $skillTypes = Service::SKILL_TYPES;
-        return view('services.create', compact('prefillfacility_id', 'categories', 'skillTypes'));
+        $facilities = \App\Models\Facility::orderBy('name')->get();
+        return view('services.create', compact('prefillfacility_id', 'categories', 'skillTypes', 'facilities'));
     }
 
     /**
@@ -54,7 +60,14 @@ class ServicesController extends Controller
             'skill_type' => 'required|string|in:' . implode(',', Service::SKILL_TYPES),
         ]);
 
-        Service::create(['service_id' => (string) Str::uuid()] + $validated);
+        // Prefer using application service when bound
+        try {
+            $createSvc = app(CreateServiceService::class);
+            $createSvc->execute($validated + ['service_id' => (string) Str::uuid()]);
+        } catch (\Throwable $e) {
+            // Fallback to Eloquent for backwards compatibility
+            Service::create(['service_id' => (string) Str::uuid()] + $validated);
+        }
 
         return redirect()->route('services.index')->with('success', 'Service created successfully.');
     }
@@ -92,7 +105,14 @@ class ServicesController extends Controller
      */
     public function destroy(Service $service)
     {
-        $service->delete();
+        try {
+            $deleteSvc = app(DeleteServiceService::class);
+            $deleteSvc->execute($service->service_id);
+        } catch (\Throwable $e) {
+            // fallback
+            $service->delete();
+        }
+
         return redirect()->route('services.index')->with('success', 'Service deleted successfully.');
     }
 }

@@ -152,4 +152,20 @@ class ParticipantEntity
             'updated_at' => $this->updatedAt?->format('Y-m-d H:i:s'),
         ];
     }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['full_name'] ?? '',
+            $data['email'] ?? '',
+            $data['affiliation'] ?? '',
+            $data['participant_type'] ?? '',
+            $data['institution'] ?? '',
+            $data['specialization'] ?? null,
+            $data['cross_skill_trained'] ?? false,
+            $data['participant_id'] ?? null,
+            isset($data['created_at']) ? new \DateTime($data['created_at']) : null,
+            isset($data['updated_at']) ? new \DateTime($data['updated_at']) : null
+        );
+    }
 }

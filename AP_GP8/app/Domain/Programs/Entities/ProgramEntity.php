@@ -40,7 +40,7 @@ class ProgramEntity
     {
         return new self(
             name: $data['name'],
-            description: $data['description'],
+            description: $data['description'] ?? '',
             program_code: $data['program_code'] ?? null,
             focus_areas: $data['focus_areas'] ?? null,
             national_alignment: $data['national_alignment'] ?? null,

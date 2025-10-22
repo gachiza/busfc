@@ -13,6 +13,12 @@ use App\Infrastructure\Facilities\FacilityRepository;
 // Participants
 use App\Domain\Participants\Repositories\ParticipantRepositoryInterface;
 use App\Infrastructure\Participants\ParticipantRepository;
+// Services
+use App\Domain\Services\Repositories\ServiceRepositoryInterface;
+use App\Infrastructure\Services\ServiceRepository;
+// Projects
+use App\Domain\Projects\Repositories\ProjectRepositoryInterface;
+use App\Infrastructure\Projects\ProjectRepository;
 
 
 use Illuminate\Support\ServiceProvider;
@@ -37,6 +43,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             ParticipantRepositoryInterface::class,
             ParticipantRepository::class
+        );
+
+        $this->app->bind(
+            ServiceRepositoryInterface::class,
+            ServiceRepository::class
+        );
+
+        $this->app->bind(
+            ProjectRepositoryInterface::class,
+            ProjectRepository::class
         );
 
     }

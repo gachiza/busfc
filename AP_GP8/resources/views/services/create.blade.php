@@ -20,8 +20,13 @@
     <form action="{{ route('services.store') }}" method="POST">
         @csrf
         <div class="mb-3">
-            <label class="form-label"><strong>Facility ID</strong></label>
-            <input type="text" name="facility_id" value="{{ old('facility_id', $prefillfacility_id) }}" class="form-control" required>
+            <label class="form-label"><strong>Facility</strong></label>
+            <select name="facility_id" class="form-control" required>
+                <option value="">-- Select Facility --</option>
+                @foreach ($facilities as $facility)
+                    <option value="{{ $facility->facility_id }}" {{ old('facility_id', $prefillfacility_id) == $facility->facility_id ? 'selected' : '' }}>{{ $facility->name }} ({{ $facility->location }})</option>
+                @endforeach
+            </select>
         </div>
         <div class="mb-3">
             <label class="form-label"><strong>Name</strong></label>

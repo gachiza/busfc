@@ -145,4 +145,20 @@ class FacilityEntity
             'updated_at' => $this->updatedAt?->format('Y-m-d H:i:s'),
         ];
     }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['name'] ?? '',
+            $data['location'] ?? '',
+            $data['facility_type'] ?? ($data['facilityType'] ?? ''),
+            $data['capabilities'] ?? ($data['capabilities'] ?? null),
+            $data['description'] ?? '',
+            $data['partner_organization'] ?? ($data['partner_organization'] ?? null),
+            $data['facility_code'] ?? ($data['facility_code'] ?? null),
+            $data['facility_id'] ?? null,
+            isset($data['created_at']) ? new \DateTime($data['created_at']) : null,
+            isset($data['updated_at']) ? new \DateTime($data['updated_at']) : null
+        );
+    }
 }

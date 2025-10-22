@@ -10,7 +10,12 @@
     <form method="GET" action="{{ route('services.index') }}" class="mb-3">
         <div class="row g-2">
             <div class="col-md-3">
-                <input type="text" name="facility_id" value="{{ request('facility_id') }}" class="form-control" placeholder="Filter by Facility ID">
+                <select name="facility_id" class="form-control">
+                    <option value="">All Facilities</option>
+                    @foreach ($facilities as $fac)
+                        <option value="{{ $fac->facility_id }}" {{ request('facility_id') == $fac->facility_id ? 'selected' : '' }}>{{ $fac->name }} ({{ $fac->location }})</option>
+                    @endforeach
+                </select>
             </div>
             <div class="col-md-3">
                 <select name="category" class="form-control">
