@@ -45,3 +45,7 @@ function something()
 {
     // ..
 }
+
+
+uses()
+    ->in('tests/Unit');

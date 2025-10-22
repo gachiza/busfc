@@ -29,5 +29,10 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+
+
+        <env name="VITE_ENABLED" value="false"/>
+        <!-- Add this line -->
+       
     </php>
 </phpunit>

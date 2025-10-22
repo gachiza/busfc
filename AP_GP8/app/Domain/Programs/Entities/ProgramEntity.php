@@ -25,8 +25,9 @@ class ProgramEntity
         // Validate business rules
         $this->validateName($name);
         $this->validateDescription($description);
+        $this->validateNationalAlignment($focus_areas, $national_alignment);
         
-        $this->program_id = $program_id ?? $this->generateId();
+        $this->program_id = $program_id ?? 'prg_' . uniqid();
         $this->name = $name;
         $this->description = $description;
         $this->program_code = $program_code;
@@ -95,17 +96,20 @@ class ProgramEntity
         $this->validateName($name);
         $this->validateDescription($description);
         
-        $this->name = $name;
-        $this->description = $description;
-        $this->focus_areas = $focus_areas;
-        $this->national_alignment = $national_alignment;
-    }
+        // Preserve existing values if null is passed
+        $finalFocusAreas        = $focus_areas        ?? $this->focus_areas;
+        $finalNationalAlignment = $national_alignment ?? $this->national_alignment;
+
+        $this->validateNationalAlignment($finalFocusAreas, $finalNationalAlignment);
+
+        $this->name               = $name;
+        $this->description        = $description;
+        $this->focus_areas        = $finalFocusAreas;
+        $this->national_alignment = $finalNationalAlignment;
+        }
 
     public function assignProgramCode(string $code): void
     {
-        if (empty(trim($code))) {
-            throw ProgramExceptions::invalidProgramCode();
-        }
         $this->program_code = $code;
     }
 
@@ -150,5 +154,26 @@ class ProgramEntity
     private function generateId(): string
     {
         return 'prg_' . uniqid() . bin2hex(random_bytes(4));
+    }
+
+    private function validateNationalAlignment(?string $focusAreas, ?string $nationalAlignment): void
+    {
+        $focusAreas = trim($focusAreas ?? '');
+        $nationalAlignment = trim($nationalAlignment ?? '');
+
+        if ($focusAreas !== '' && $nationalAlignment === '') {
+            throw ProgramExceptions::invalidNationalAlignment();
+        }
+
+        if ($nationalAlignment !== '') {
+            $tokens = array_filter(array_map('trim', explode(',', $nationalAlignment)));
+            $allowed = ['NDPIII', 'DigitalRoadmap2023_2028', '4IR'];
+
+            foreach ($tokens as $token) {
+                if (!in_array($token, $allowed, true)) {
+                    throw ProgramExceptions::invalidNationalAlignment();
+                }
+            }
+        }
     }
 }
