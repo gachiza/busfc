@@ -49,6 +49,18 @@ class FacilityEntity
         return $this->name;
     }
 
+    // Backward-compatible alias used by some Blade views
+    public function getName(): string
+    {
+        return $this->getFacilityName();
+    }
+
+    // Backward-compatible alias for id
+    public function getId(): ?string
+    {
+        return $this->getFacilityId();
+    }
+
     public function getFacilityLocation(): string
     {
         return $this->location;

@@ -19,6 +19,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+    
+    // MVC home page that lists/selects core entities
+    Route::get('home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
 
 

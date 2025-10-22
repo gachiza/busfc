@@ -50,6 +50,43 @@ class ProgramEntity
         );
     }
 
+    /**
+     * Hydrate an entity from storage without running validation.
+     * Use this when converting Eloquent models -> domain entities.
+     */
+    public static function hydrate(array $data): self
+    {
+        $ref = new \ReflectionClass(self::class);
+        $obj = $ref->newInstanceWithoutConstructor();
+
+        $props = [
+            'program_id' => $data['program_id'] ?? null,
+            'name' => $data['name'] ?? '',
+            'description' => $data['description'] ?? '',
+            'program_code' => $data['program_code'] ?? null,
+            'focus_areas' => $data['focus_areas'] ?? null,
+            'national_alignment' => $data['national_alignment'] ?? null,
+            'phases' => $data['phases'] ?? null,
+        ];
+
+        foreach ($props as $propName => $value) {
+            if ($ref->hasProperty($propName)) {
+                $p = $ref->getProperty($propName);
+                $p->setAccessible(true);
+                $p->setValue($obj, $value);
+            }
+        }
+
+        // If program_id was not provided, generate one
+        if (empty($props['program_id'])) {
+            $p = $ref->getProperty('program_id');
+            $p->setAccessible(true);
+            $p->setValue($obj, 'prg_' . uniqid() . bin2hex(random_bytes(4)));
+        }
+
+        return $obj;
+    }
+
     // Getters
     public function getProgramId(): string
     {
@@ -150,8 +187,9 @@ class ProgramEntity
 
     private function validateNationalAlignment(?string $focus_areas, ?string $national_alignment): void
     {
-        $validAlignments = ['NDPIII', 'DigitalRoadmap2023_2028', '4IR'];
-        
+        // Allowed display/alignment strings (kept to match historical exception message)
+        $displayAlignments = ['NDPIII', 'DigitalRoadmap2023_2028', '4IR'];
+
         if (!empty($focus_areas) && empty($national_alignment)) {
             throw ProgramExceptions::missingNationalAlignment();
         }
@@ -159,14 +197,20 @@ class ProgramEntity
         if (!empty($national_alignment)) {
             $alignments = array_map('trim', explode(',', $national_alignment));
             $valid = false;
+
             foreach ($alignments as $alignment) {
-                if (in_array($alignment, $validAlignments)) {
+                // Normalize: lowercase and remove non-alphanumeric characters
+                $normalized = strtolower(preg_replace('/[^a-z0-9]/i', '', $alignment));
+
+                // Accept variants for the known alignments
+                if (in_array($normalized, ['ndpiii', 'digitalroadmap20232028', 'digitalroadmap2023_2028', '4ir', '4_ir'])) {
                     $valid = true;
                     break;
                 }
             }
+
             if (!$valid) {
-                throw ProgramExceptions::invalidNationalAlignment($validAlignments);
+                throw ProgramExceptions::invalidNationalAlignment($displayAlignments);
             }
         }
     }

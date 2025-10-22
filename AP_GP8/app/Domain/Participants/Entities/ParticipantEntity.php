@@ -50,6 +50,18 @@ class ParticipantEntity
         return $this->fullName;
     }
 
+    // Backward-compatible alias used by older views
+    public function getName(): string
+    {
+        return $this->getFullName();
+    }
+
+    // Backward-compatible alias for id
+    public function getId(): ?string
+    {
+        return $this->getParticipantId();
+    }
+
     public function getEmail(): string
     {
         return $this->email;

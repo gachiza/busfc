@@ -11,7 +11,7 @@ class ProgramRepository implements ProgramRepositoryInterface
     public function all(): array
     {
         return Program::all()
-            ->map(fn($model) => ProgramEntity::fromArray($this->modelToArray($model)))
+            ->map(fn($model) => ProgramEntity::hydrate($this->modelToArray($model)))
             ->toArray();
     }
 
@@ -27,7 +27,7 @@ class ProgramRepository implements ProgramRepositoryInterface
             'phases' => $program->getPhases(),
         ]);
 
-        return ProgramEntity::fromArray($this->modelToArray($model));
+        return ProgramEntity::hydrate($this->modelToArray($model));
     }
 
     public function update(ProgramEntity $program): ProgramEntity
@@ -43,7 +43,7 @@ class ProgramRepository implements ProgramRepositoryInterface
             'phases' => $program->getPhases(),
         ]);
         
-        return ProgramEntity::fromArray($this->modelToArray($model->fresh()));
+        return ProgramEntity::hydrate($this->modelToArray($model->fresh()));
     }
 
     public function delete(string $id): void
@@ -62,7 +62,7 @@ class ProgramRepository implements ProgramRepositoryInterface
     {
         $program = Program::where('program_id', $id)->first();
         
-        return $program ? ProgramEntity::fromArray($this->modelToArray($program)) : null;
+        return $program ? ProgramEntity::hydrate($this->modelToArray($program)) : null;
     }
 
     public function existsByName(string $name): bool

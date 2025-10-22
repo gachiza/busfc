@@ -3,6 +3,7 @@
 namespace App\Domain\Programs\Fakes;
 
 use App\Domain\Programs\Entities\ProgramEntity;
+use App\Domain\Programs\Exceptions\ProgramExceptions;
 use App\Domain\Programs\Repositories\ProgramRepositoryInterface;
 
 class FakeProgramRepository implements ProgramRepositoryInterface
@@ -33,7 +34,7 @@ class FakeProgramRepository implements ProgramRepositoryInterface
     }
 
     public function update(ProgramEntity $program): ProgramEntity {
-        $id = $program->getId();
+        $id = $program->getProgramId();
         if (!isset($this->store[$id])) {
             throw new \Exception("Program not found: $id");
         }
@@ -44,7 +45,7 @@ class FakeProgramRepository implements ProgramRepositoryInterface
 
     public function delete(string $id): void {
         if (!empty($this->projects[$id] ?? [])) {
-            throw ProgramExceptions::hasProjects($id);
+            throw ProgramExceptions::cannotDeleteWithProjects();
         }
         unset($this->store[$id]);
     }

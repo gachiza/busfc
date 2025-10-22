@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('partials._home_styles')
 <div class="row">
     <div class="col-lg-12 margin-tb">
         <div class="pull-left">

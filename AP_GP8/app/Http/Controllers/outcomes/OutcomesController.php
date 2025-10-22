@@ -151,6 +151,7 @@ class OutcomesController extends Controller
         $ext = pathinfo($outcome->artifact_link, PATHINFO_EXTENSION);
         $downloadName = $filename ? ($filename . ($ext ? ".{$ext}" : '')) : basename($outcome->artifact_link);
 
-        return Storage::disk('public')->download($outcome->artifact_link, $downloadName);
+        $filePath = Storage::disk('public')->path($outcome->artifact_link);
+        return response()->download($filePath, $downloadName);
     }
 }
