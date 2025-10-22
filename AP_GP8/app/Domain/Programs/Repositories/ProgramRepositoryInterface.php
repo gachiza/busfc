@@ -13,4 +13,5 @@ interface ProgramRepositoryInterface
     public function findById(string $id): ?ProgramEntity;
     public function existsByName(string $name): bool;
     public function getProjects(string $programId): array;
+    public function hasProjects(string $programId): bool;
 }

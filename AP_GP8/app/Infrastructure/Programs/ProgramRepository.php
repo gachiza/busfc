@@ -84,6 +84,16 @@ class ProgramRepository implements ProgramRepositoryInterface
             ->map(fn($proj) => $proj->toArray())
             ->toArray();
     }
+    public function hasProjects(string $programId): bool
+    {
+        $programModel = Program::where('program_id', $programId)->first();
+
+        if (!$programModel) {
+            return false;
+        }
+
+        return $programModel->projects()->exists();
+    }
 
     /**
      * Convert Eloquent model to array format for Entity
